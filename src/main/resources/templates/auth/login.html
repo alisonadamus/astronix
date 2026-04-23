@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<html th:replace="layout :: layout(~{::title}, ~{::#main-content})">
+<head>
+    <title>Вхід - Astronix</title>
+</head>
+<body>
+<div id="main-content">
+    <div class="auth-container">
+        <h2>Вхід в Astronix</h2>
+
+        <div th:if="${param.error}" class="alert alert-error">
+            Невірний email або пароль
+        </div>
+        <div th:if="${param.logout}" class="alert alert-info">
+            Ви успішно вийшли з системи
+        </div>
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+        <form method="post" th:action="@{/auth/login}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <label>Email</label>
+            <input type="email" name="username" required placeholder="astronaut@astronix.com"/>
+
+            <label>Пароль</label>
+            <input type="password" name="password" required placeholder="••••••••"/>
+
+            <button type="submit">Увійти</button>
+        </form>
+
+        <p>Немає акаунту? <a th:href="@{/auth/register}">Приєднатись</a></p>
+    </div>
+</div>
+</body>
+</html>
