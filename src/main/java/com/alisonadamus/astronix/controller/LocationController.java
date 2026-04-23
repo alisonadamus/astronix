@@ -19,6 +19,7 @@ public class LocationController {
     public String showLocationsPage(@RequestParam(value = "search", required = false) String search, Model model) {
         model.addAttribute("locations", locationService.searchLocations(search));
         model.addAttribute("searchQuery", search);
+        model.addAttribute("showSearch", true);
         return "locations";
     }
 }

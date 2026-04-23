@@ -11,7 +11,7 @@
     <nav class="navbar">
         <a th:href="@{/locations}" class="nav-brand">ASTRONIX</a>
 
-        <div class="nav-search">
+        <div class="nav-search" th:if="${showSearch}">
             <form th:action="@{/locations}" method="get">
                 <input type="text" name="search" th:value="${searchQuery}" placeholder="Знайти систему...">
                 <button type="submit">Радар</button>

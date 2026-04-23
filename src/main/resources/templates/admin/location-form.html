@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<html th:replace="~{layout :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title>Редактор координат - Astronix</title>
+</head>
+<body>
+<div id="main-content" style="width: 100%; padding: 0;">
+    <nav class="navbar" th:replace="~{locations :: .navbar}"></nav>
+
+    <div class="admin-layout">
+        <aside class="sidebar" th:replace="~{admin/locations :: aside}"></aside>
+
+        <main class="admin-content">
+            <h2 th:text="${location.id == null ? 'Відкрити нову локацію' : 'Коригування координат'}"></h2>
+
+            <div class="auth-container" style="max-width: 600px; margin: 0; text-align: left;">
+                <form th:action="@{/admin/locations/save}" th:object="${location}" method="post">
+                    <input type="hidden" th:field="*{id}">
+
+                    <label>Назва системи / планети</label>
+                    <input type="text" th:field="*{name}" required placeholder="Напр: Альфа Центавра">
+
+                    <label>URL зображення (планета)</label>
+                    <input type="text" th:field="*{imageUrl}" placeholder="https://image-link.com/planet.png">
+
+                    <label>Опис локації</label>
+                    <textarea th:field="*{description}" rows="5"
+                              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: white; padding: 10px; font-family: inherit; margin-bottom: 20px;"></textarea>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit">Зберегти в базу</button>
+                        <a th:href="@{/admin/locations}" style="text-align: center; line-height: 50px; color: #a0aec0;">Скасувати</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

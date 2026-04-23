@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<html th:replace="~{layout :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title>Центр управління - Astronix</title>
+</head>
+<body>
+<div id="main-content" style="width: 100%; padding: 0;">
+
+    <nav class="navbar" th:replace="~{locations :: .navbar}"></nav>
+
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li th:class="${activeTab == 'users' ? 'active' : ''}" >
+                    <a th:href="@{/admin/users}">Користувачі</a>
+                </li>
+                <li th:class="${activeTab == 'locations' ? 'active' : ''}">
+                    <a th:href="@{/admin/locations}">Локації</a>
+                </li>
+                <li th:class="${activeTab == 'categories' ? 'active' : ''}">
+                    <a th:href="@{/admin/categories}">Категорії матеріалів</a>
+                </li>
+                <li  th:class="${activeTab == 'materials' ? 'active' : ''}">
+                    <a th:href="@{/admin/materials}">Матеріали</a>
+                </li>
+                <li><a href="#">Завдання</a></li>
+            </ul>
+        </aside>
+
+        <main class="admin-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Керування локаціями</h2>
+
+                <form th:action="@{/admin/locations}" method="get" style="display: flex; gap: 10px;">
+                    <input type="text" name="search" th:value="${searchQuery}"
+                           placeholder="Пошук..."
+                           style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 15px; color: white;">
+                    <button type="submit" class="btn-add" style="margin-bottom: 0;">Знайти</button>
+                </form>
+
+                <a th:href="@{/admin/locations/add}" class="btn-add">+ Нова Локація</a>
+            </div>
+
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Назва</th>
+                    <th>Опис (коротко)</th>
+                    <th>Дії</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="loc : ${locations}">
+                    <td th:text="${loc.id}"></td>
+                    <td th:text="${loc.name}" style="font-weight: 600;"></td>
+                    <td th:text="${#strings.abbreviate(loc.description, 50)}"></td>
+                    <td>
+                        <a th:href="@{/admin/locations/edit/{id}(id=${loc.id})}" class="btn-edit">Редагувати</a>
+                        <a th:href="@{/admin/locations/delete/{id}(id=${loc.id})}"
+                           class="btn-delete"
+                           onclick="return confirm('Видалити цю систему з карти?')">Видалити</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+</div>
+</body>
+</html>

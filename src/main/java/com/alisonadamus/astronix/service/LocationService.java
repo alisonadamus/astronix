@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,5 +23,21 @@ public class LocationService {
             return getAllLocations();
         }
         return locationRepository.findByNameContainingIgnoreCase(query);
+    }
+
+    public void save(Location location) {
+        locationRepository.save(location);
+    }
+
+    public Location getById(Long locationId) {
+        return locationRepository.findById(locationId).orElse(null);
+    }
+
+    public Location getByName(String locationName) {
+        return locationRepository.findByName(locationName).orElse(null);
+    }
+
+    public void delete(Long locationId) {
+        locationRepository.deleteById(locationId);
     }
 }
