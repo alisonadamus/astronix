@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="uk">
+<html th:replace="~{layout :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title>Карта Галактики - Astronix</title>
+</head>
+<body>
+<div id="main-content" style="width: 100%; padding: 0;">
+    <nav class="navbar">
+        <a th:href="@{/locations}" class="nav-brand">ASTRONIX</a>
+
+        <div class="nav-search">
+            <form th:action="@{/locations}" method="get">
+                <input type="text" name="search" th:value="${searchQuery}" placeholder="Знайти систему...">
+                <button type="submit">Радар</button>
+            </form>
+        </div>
+
+        <div class="nav-links">
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin}" class="admin-badge">Командний Центр (Admin)</a>
+
+            <a th:href="@{/profile}">Мій профіль</a>
+
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button type="submit"
+                        style="background: none; border: none; color: #a0aec0; cursor: pointer; font-family: inherit;">
+                    Вийти
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="space-map" id="map-container">
+        <div th:if="${locations.empty}" style="text-align: center; margin-top: 50px; color: #a0aec0;">
+            <p>Жодної локації не знайдено на радарах.</p>
+        </div>
+
+        <a th:each="loc : ${locations}" th:href="@{/locations/{id}(id=${loc.id})}" class="planet-card">
+            <img th:src="${loc.imageUrl != null} ? ${loc.imageUrl} : '/images/default-planet.png'"
+                 alt="Planet" class="planet-image">
+            <span class="planet-name" th:text="${loc.name}">Назва локації</span>
+        </a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const mapContainer = document.getElementById('map-container');
+            const planets = Array.from(document.querySelectorAll('.planet-card'));
+            let currentY = 60;
+            let i = 0;
+
+            while (i < planets.length) {
+                const isDouble = Math.random() > 0.4 && (i + 1 < planets.length);
+
+                if (isDouble) {
+                    const p1 = planets[i];
+                    const x1 = Math.floor(Math.random() * 30) + 5;
+                    const yOffset1 = Math.floor(Math.random() * 80);
+
+                    p1.style.left = x1 + '%';
+                    p1.style.top = (currentY + yOffset1) + 'px';
+
+                    const p2 = planets[i + 1];
+                    const x2 = Math.floor(Math.random() * 30) + 50;
+                    const yOffset2 = Math.floor(Math.random() * 80);
+
+                    p2.style.left = x2 + '%';
+                    p2.style.top = (currentY + yOffset2) + 'px';
+
+                    i += 2;
+                    currentY += 350;
+                } else {
+                    const p = planets[i];
+                    const x = Math.floor(Math.random() * 65) + 10;
+
+                    p.style.left = x + '%';
+                    p.style.top = currentY + 'px';
+
+                    i += 1;
+                    currentY += 300;
+                }
+            }
+            mapContainer.style.height = (currentY + 100) + 'px';
+        });
+    </script>
+</div>
+</body>
+</html>
