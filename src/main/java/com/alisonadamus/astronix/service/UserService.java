@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -32,6 +34,20 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setRole(Role.ROLE_USER);
 
+        userRepository.save(user);
+    }
+
+    public List<User> getAllUsers(String search) {
+        if (search != null && !search.isEmpty()) {
+            return userRepository.findByLoginContainingIgnoreCaseOrEmailContainingIgnoreCase(search, search);
+        }
+        return userRepository.findAll();
+    }
+
+    public void updateRole(Long userId, Role role) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Користувача не знайдено"));
+        user.setRole(role);
         userRepository.save(user);
     }
 }

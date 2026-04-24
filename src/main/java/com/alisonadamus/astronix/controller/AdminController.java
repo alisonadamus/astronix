@@ -20,12 +20,28 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminController {
 
     private final LocationService locationService;
+    private final UserService userService;
 
     @GetMapping
     public String adminIndex() {
         return "redirect:/admin/locations";
     }
 
+    @GetMapping("/users")
+    public String listUsers(@RequestParam(required = false) String search, Model model) {
+        model.addAttribute("users", userService.getAllUsers(search));
+        model.addAttribute("searchQuery", search);
+        model.addAttribute("roles", Role.values());
+        model.addAttribute("activeTab", "users");
+        return "admin/users";
+    }
+
+    @PostMapping("/users/update-role")
+    public String updateRole(@RequestParam Long userId, @RequestParam Role role, RedirectAttributes ra) {
+        userService.updateRole(userId, role);
+        ra.addFlashAttribute("success", "Рівень доступу користувача змінено.");
+        return "redirect:/admin/users";
+    }
 
     @GetMapping("/locations")
     public String listLocations(@RequestParam(value = "search", required = false) String search, Model model) {

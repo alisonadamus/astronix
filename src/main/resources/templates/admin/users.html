@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<html th:replace="~{layout :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title>Екіпаж - Astronix Admin</title>
+</head>
+<body>
+<div id="main-content" style="width: 100%; padding: 0;">
+    <nav class="navbar" th:replace="~{locations :: .navbar}"></nav>
+
+    <div class="admin-layout">
+        <aside class="sidebar" th:replace="~{admin/locations :: aside}"></aside>
+
+        <main class="admin-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Керування екіпажем (Користувачі)</h2>
+
+                <form th:action="@{/admin/users}" method="get" style="display: flex; gap: 10px;">
+                    <input type="text" name="search" th:value="${searchQuery}"
+                           placeholder="Пошук за логіном/email..."
+                           style="min-width: 250px;">
+                    <button type="submit" class="btn-add" style="margin: 0;">Сканувати</button>
+                </form>
+            </div>
+
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Логін</th>
+                    <th>Email</th>
+                    <th>Поточна роль</th>
+                    <th>Змінити доступ</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.id}"></td>
+                    <td th:text="${user.login}" style="font-weight: 600;"></td>
+                    <td th:text="${user.email}" style="color: #a0aec0;"></td>
+                    <td>
+                            <span th:class="${user.role.name() == 'ROLE_ADMIN' ? 'admin-badge' : 'user-badge'}"
+                                  th:text="${user.role.name() == 'ROLE_ADMIN' ? 'Адміністратор' : 'Дослідник'}"
+                                  style="padding: 4px 10px; border-radius: 4px; font-size: 0.8rem;">
+                            </span>
+                    </td>
+                    <td>
+                        <form th:action="@{/admin/users/update-role}" method="post" style="display: flex; gap: 8px; align-items: center;">
+                            <input type="hidden" name="userId" th:value="${user.id}">
+                            <select name="role" style="padding: 5px; font-size: 0.85rem; height: 35px; width: auto;">
+                                <option th:each="roleOpt : ${roles}"
+                                        th:value="${roleOpt}"
+                                        th:text="${roleOpt == T(com.alisonadamus.astronix.model.Role).ROLE_ADMIN ? 'Адмін' : 'Користувач'}"
+                                        th:selected="${user.role == roleOpt}">
+                                </option>
+                            </select>
+                            <button type="submit"
+                                    style="background: rgba(79, 172, 254, 0.2); border: 1px solid #4facfe; color: white; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem;">
+                                Оновити
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+</div>
+</body>
+</html>
