@@ -20,6 +20,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminController {
 
     private final LocationService locationService;
+    private final MaterialCategoryService categoryService;
+    private final MaterialService materialService;
     private final UserService userService;
 
     @GetMapping
@@ -79,4 +81,83 @@ public class AdminController {
         return "redirect:/admin/locations";
     }
 
+    @GetMapping("/categories")
+    public String listCategories(@RequestParam(value = "search", required = false) String search, Model model) {
+        model.addAttribute("categories", categoryService.getAll(search));
+        model.addAttribute("searchQuery", search);
+        model.addAttribute("activeTab", "categories");
+        return "admin/categories";
+    }
+
+    @GetMapping("/categories/add")
+    public String showCategoryAddForm(Model model) {
+        model.addAttribute("category", new MaterialCategory());
+        model.addAttribute("activeTab", "categories");
+        return "admin/category-form";
+    }
+
+    @PostMapping("/categories/save")
+    public String saveCategory(@ModelAttribute MaterialCategory category, RedirectAttributes ra) {
+        categoryService.save(category);
+        ra.addFlashAttribute("success", "Реєстр категорій оновлено.");
+        return "redirect:/admin/categories";
+    }
+
+    @GetMapping("/categories/edit/{id}")
+    public String showCategoryEditForm(@PathVariable Long id, Model model) {
+        model.addAttribute("category", categoryService.getById(id));
+        model.addAttribute("activeTab", "categories");
+        return "admin/category-form";
+    }
+
+    @GetMapping("/categories/delete/{id}")
+    public String deleteCategory(@PathVariable Long id, RedirectAttributes ra) {
+        categoryService.delete(id);
+        ra.addFlashAttribute("success", "Категорію видалено.");
+        return "redirect:/admin/categories";
+    }
+
+    @GetMapping("/materials")
+    public String listMaterials(@RequestParam(required = false) String search,
+                                @RequestParam(required = false) Long locationId,
+                                @RequestParam(required = false) Long categoryId,
+                                Model model) {
+        model.addAttribute("materials", materialService.getFiltered(search, locationId, categoryId));
+        model.addAttribute("locations", locationService.getAllLocations());
+        model.addAttribute("categories", categoryService.getAll(null));
+        model.addAttribute("activeTab", "materials");
+        return "admin/materials";
+    }
+
+    @GetMapping("/materials/add")
+    public String showMaterialForm(Model model) {
+        model.addAttribute("material", new Material());
+        model.addAttribute("locations", locationService.getAllLocations());
+        model.addAttribute("categories", categoryService.getAll(null));
+        model.addAttribute("activeTab", "materials");
+        return "admin/material-form";
+    }
+
+    @PostMapping("/materials/save")
+    public String saveMaterial(@ModelAttribute Material material) {
+        materialService.save(material);
+        return "redirect:/admin/materials";
+    }
+
+    @GetMapping("/materials/edit/{id}")
+    public String showEditMaterialForm(@PathVariable Long id, Model model) {
+        Material material = materialService.getById(id);
+        model.addAttribute("material", material);
+        model.addAttribute("locations", locationService.getAllLocations());
+        model.addAttribute("categories", categoryService.getAll(null));
+        model.addAttribute("activeTab", "materials");
+        return "admin/material-form";
+    }
+
+    @GetMapping("/materials/delete/{id}")
+    public String deleteMaterial(@PathVariable Long id, RedirectAttributes ra) {
+        materialService.delete(id);
+        ra.addFlashAttribute("success", "Матеріал видалено.");
+        return "redirect:/admin/materials";
+    }
 }

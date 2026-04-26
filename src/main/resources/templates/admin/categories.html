@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<html th:replace="~{layout :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title>Категорії матеріалів - Astronix</title>
+</head>
+<body>
+<div id="main-content" style="width: 100%; padding: 0;">
+    <nav class="navbar" th:replace="~{locations :: .navbar}"></nav>
+
+    <div class="admin-layout">
+        <aside class="sidebar" th:replace="~{admin/locations :: aside}"></aside>
+
+        <main class="admin-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Категорії матеріалів</h2>
+
+                <form th:action="@{/admin/categories}" method="get" style="display: flex; gap: 10px;">
+                    <input type="text" name="search" th:value="${searchQuery}"
+                           placeholder="Пошук категорії..."
+                           style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 8px 15px; color: white;">
+                    <button type="submit" class="btn-add" style="margin-bottom: 0;">Аналіз</button>
+                </form>
+
+                <a th:href="@{/admin/categories/add}" class="btn-add">+ Додати категорію</a>
+            </div>
+
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Іконка</th>
+                    <th>Назва</th>
+                    <th>Дії</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="cat : ${categories}">
+                    <td th:text="${cat.id}"></td>
+                    <td style="vertical-align: middle;">
+                        <div th:if="${cat.icon != null and (#strings.startsWith(cat.icon, 'http') or #strings.startsWith(cat.icon, '/'))}"
+                             style="width: 40px; height: 40px; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <img th:src="${cat.icon}"
+                                 style="width: 100%; height: 100%; object-fit: cover;"
+                                 alt="icon">
+                        </div>
+
+                        <span th:unless="${cat.icon != null and (#strings.startsWith(cat.icon, 'http') or #strings.startsWith(cat.icon, '/'))}"
+                              th:text="${cat.icon}"
+                              style="font-size: 1.5rem;">
+        </span>
+                    </td>
+                    <td th:text="${cat.name}" style="font-weight: 600; color: #4facfe; vertical-align: middle;"></td>
+                    <td style="vertical-align: middle;">
+                        <a th:href="@{/admin/categories/edit/{id}(id=${cat.id})}" class="btn-edit">Коригувати</a>
+                        <a th:href="@{/admin/categories/delete/{id}(id=${cat.id})}"
+                           class="btn-delete"
+                           onclick="return confirm('Видалити цю категорію?')">Вилучити</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<html th:replace="~{layout :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title>Налаштування категорії - Astronix</title>
+</head>
+<body>
+<div id="main-content" style="width: 100%; padding: 0;">
+    <nav class="navbar" th:replace="~{locations :: .navbar}"></nav>
+
+    <div class="admin-layout">
+        <aside class="sidebar" th:replace="~{admin/locations :: aside}"></aside>
+
+        <main class="admin-content">
+            <h2 th:text="${category.id == null ? 'Створення нової категорії' : 'Редагування категорії'}"></h2>
+
+            <div class="auth-container" style="max-width: 500px; margin: 0; text-align: left;">
+                <form th:action="@{/admin/categories/save}" th:object="${category}" method="post">
+                    <input type="hidden" th:field="*{id}">
+
+                    <label>Назва категорії</label>
+                    <input type="text" th:field="*{name}" required placeholder="Теорія...">
+
+                    <label>Іконка (Emoji або URL)</label>
+                    <input type="text" th:field="*{icon}" placeholder="https://image-link.com/theory.png">
+                    <p style="font-size: 0.8rem; color: #a0aec0; margin-top: -15px; margin-bottom: 20px;">
+                        Використовуйте смайли або символи для швидкої ідентифікації.
+                    </p>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="submit">Зберегти категорію</button>
+                        <a th:href="@{/admin/categories}" style="text-align: center; line-height: 50px; color: #a0aec0;">Назад</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

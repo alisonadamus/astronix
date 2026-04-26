@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<html th:replace="~{layout :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title>Матеріали - Astronix</title>
+</head>
+<body>
+<div id="main-content" style="width: 100%; padding: 0;">
+    <nav class="navbar" th:replace="~{locations :: .navbar}"></nav>
+
+    <div class="admin-layout">
+        <aside class="sidebar" th:replace="~{admin/locations :: aside}"></aside>
+
+        <main class="admin-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Архів матеріалів</h2>
+                <a th:href="@{/admin/materials/add}" class="btn-add">+ Новий запис</a>
+            </div>
+
+            <form th:action="@{/admin/materials}" method="get"
+                  style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 30px; align-items: end;">
+
+                <div>
+                    <label style="font-size: 0.8rem; color: #4facfe; margin-bottom: 5px; display: block;">Назва</label>
+                    <input type="text" name="search" th:value="${param.search}" placeholder="Пошук за назвою...">
+                </div>
+
+                <div>
+                    <label style="font-size: 0.8rem; color: #4facfe; margin-bottom: 5px; display: block;">Локація</label>
+                    <select name="locationId">
+                        <option value="">Всі системи</option>
+                        <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}" th:selected="${param.locationId == loc.id}"></option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="font-size: 0.8rem; color: #4facfe; margin-bottom: 5px; display: block;">Категорія</label>
+                    <select name="categoryId">
+                        <option value="">Всі типи</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}" th:selected="${param.categoryId == cat.id}"></option>
+                    </select>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn-add" style="width: 100%; margin: 0; height: 42px;">Застосувати фільтри</button>
+                </div>
+            </form>
+
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Назва</th>
+                    <th>Локація</th>
+                    <th>Категорії</th>
+                    <th>Час (хв)</th>
+                    <th>Дії</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="m : ${materials}">
+                    <td th:text="${m.id}"></td>
+                    <td th:text="${m.name}" style="font-weight: bold;"></td>
+                    <td>
+                        <span th:if="${m.location != null}" th:text="${m.location.name}" style="color: #a0aec0;"></span>
+                    </td>
+                    <td>
+                        <span th:each="cat : ${m.categories}" th:title="${cat.name}"></span>
+                    </td>
+                    <td th:text="${m.estimatedTime}"></td>
+                    <td>
+                        <a th:href="@{/admin/materials/edit/{id}(id=${m.id})}" class="btn-edit">Ред.</a>
+                        <a th:href="@{/admin/materials/delete/{id}(id=${m.id})}" class="btn-delete"
+                           onclick="return confirm('Видалити?')">Видалити</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+</div>
+</body>
+</html>
