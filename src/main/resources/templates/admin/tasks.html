@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<html th:replace="~{layout :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title>Завдання - Astronix</title>
+</head>
+<body>
+<div id="main-content" style="width: 100%; padding: 0;">
+    <nav class="navbar" th:replace="~{locations :: .navbar}"></nav>
+
+    <div class="admin-layout">
+        <aside class="sidebar" th:replace="~{admin/locations :: aside}"></aside>
+
+        <main class="admin-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Бортовий журнал випробувань</h2>
+                <a th:href="@{/admin/tasks/add}" class="btn-add">+ Нове завдання</a>
+            </div>
+
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>Порядок</th>
+                    <th>Тип</th>
+                    <th>Локація</th>
+                    <th>Зображення</th>
+                    <th>Питання</th>
+                    <th>Складність</th>
+                    <th>Дії</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="t : ${tasks}">
+                    <td th:text="${t.orderIndex}" style="font-weight: bold; color: #4facfe;"></td>
+                    <td th:text="${t.type}"></td>
+                    <td th:text="${t.location != null ? t.location.name : '---'}" style="color: #4facfe;"></td>
+                    <td>
+                        <img th:if="${t.imageUrl}" th:src="${t.imageUrl}"
+                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px; border: 1px solid rgba(255,255,255,0.1);">
+                        <span th:unless="${t.imageUrl}" style="color: #4a5568;">-</span>
+                    </td>
+                    <td>
+                        <div th:text="${#strings.abbreviate(t.question, 60)}" th:title="${t.question}"></div>
+                        <small th:if="${t.material}" th:text="'Теорія: ' + ${t.material.name}"
+                               style="color: #a0aec0;"></small>
+                    </td>
+                    <td>
+                            <span th:text="${t.difficulty}"
+                                  th:style="'color:' + (${t.difficulty.name() == 'HARD' ? '#ff6b6b' : (t.difficulty.name() == 'EASY' ? '#48bb78' : '#ed8936')})">
+                            </span>
+                    </td>
+                    <td>
+                        <a th:href="@{/admin/tasks/edit/{id}(id=${t.id})}" class="btn-edit">Редагувати</a>
+                        <a th:href="@{/admin/tasks/delete/{id}(id=${t.id})}" class="btn-delete"
+                           onclick="return confirm('Увага! Видалення завдання видалить всі пов\'язані відповіді. Продовжити?')">Вилучити</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+</div>
+</body>
+</html>

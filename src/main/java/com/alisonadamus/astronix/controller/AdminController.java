@@ -1,18 +1,17 @@
 package com.alisonadamus.astronix.controller;
 
-import com.alisonadamus.astronix.model.Location;
-import com.alisonadamus.astronix.model.Material;
-import com.alisonadamus.astronix.model.MaterialCategory;
-import com.alisonadamus.astronix.model.Role;
-import com.alisonadamus.astronix.service.LocationService;
-import com.alisonadamus.astronix.service.MaterialCategoryService;
-import com.alisonadamus.astronix.service.MaterialService;
-import com.alisonadamus.astronix.service.UserService;
+import com.alisonadamus.astronix.dto.MaterialDTO;
+import com.alisonadamus.astronix.model.*;
+import com.alisonadamus.astronix.service.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.Collections;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -23,6 +22,7 @@ public class AdminController {
     private final MaterialCategoryService categoryService;
     private final MaterialService materialService;
     private final UserService userService;
+    private final TaskService taskService;
 
     @GetMapping
     public String adminIndex() {
@@ -159,5 +159,63 @@ public class AdminController {
         materialService.delete(id);
         ra.addFlashAttribute("success", "Матеріал видалено.");
         return "redirect:/admin/materials";
+    }
+
+    @GetMapping("/tasks")
+    public String listTasks(Model model) {
+        model.addAttribute("tasks", taskService.getAllTasks());
+        model.addAttribute("activeTab", "tasks");
+        return "admin/tasks";
+    }
+
+    @GetMapping("/tasks/add")
+    public String showTaskForm(Model model) {
+        model.addAttribute("task", new Task());
+        model.addAttribute("types", TaskType.values());
+        model.addAttribute("difficulties", Difficulty.values());
+        model.addAttribute("materials", Collections.emptyList());
+        model.addAttribute("locations", locationService.getAllLocations());
+        model.addAttribute("occupiedIndices", Collections.emptyList());
+        model.addAttribute("activeTab", "tasks");
+        return "admin/task-form";
+    }
+
+    @GetMapping("/tasks/edit/{id}")
+    public String showEditTaskForm(@PathVariable Long id, Model model) {
+        Task task = taskService.getById(id);
+        model.addAttribute("task", task);
+        model.addAttribute("types", TaskType.values());
+        model.addAttribute("difficulties", Difficulty.values());
+
+        model.addAttribute("locations", locationService.getAllLocations());
+        if (task.getLocation() != null) {
+            model.addAttribute("materials", materialService.getByLocation(task.getLocation().getId()));
+            model.addAttribute("occupiedIndices", taskService.getOccupiedIndices(task.getLocation().getId()));
+        } else {
+            model.addAttribute("occupiedIndices", Collections.emptyList());
+            model.addAttribute("materials", Collections.emptyList());
+        }
+        model.addAttribute("activeTab", "tasks");
+        return "admin/task-form";
+    }
+
+    @PostMapping("/tasks/save")
+    public String saveTask(@ModelAttribute Task task, HttpServletRequest request) {
+        taskService.saveWithAnswers(task, request);
+        return "redirect:/admin/tasks";
+    }
+
+    @GetMapping("/tasks/occupied-indices")
+    @ResponseBody
+    public List<Integer> getIndices(@RequestParam Long locationId) {
+        return taskService.getOccupiedIndices(locationId);
+    }
+
+    @GetMapping("/tasks/materials-by-location")
+    @ResponseBody
+    public List<MaterialDTO> getMaterialsByLocation(@RequestParam Long locationId) {
+        return materialService.getByLocation(locationId).stream()
+                .map(m -> new MaterialDTO(m.getId(), m.getName()))
+                .toList();
     }
 }

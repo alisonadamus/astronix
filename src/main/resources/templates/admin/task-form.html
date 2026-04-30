@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<html th:replace="~{layout :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title>Завдання - Astronix</title>
+</head>
+<body>
+<div id="main-content" style="width: 100%; padding: 0;">
+    <nav class="navbar" th:replace="~{locations :: .navbar}"></nav>
+
+    <div class="admin-layout">
+        <aside class="sidebar" th:replace="~{admin/locations :: aside}"></aside>
+        <main class="admin-content">
+            <h2>Конструктор випробувань</h2>
+
+            <div class="auth-container" style="max-width: 1000px; margin: 0; text-align: left;">
+                <form th:action="@{/admin/tasks/save}" th:object="${task}" method="post" id="taskForm">
+                    <input type="hidden" th:field="*{id}">
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                        <div>
+                            <label>Питання (Текст завдання)</label>
+                            <textarea th:field="*{question}" rows="4" required
+                                      placeholder="Що відбувається під час сингулярності?"></textarea>
+
+                            <label>URL зображення</label>
+                            <input type="text" th:field="*{imageUrl}" id="imageUrlInput" placeholder="https://...">
+
+                            <label>Матеріал (прив'язка до теорії)</label>
+                            <select th:field="*{material}" id="materialSelect">
+                                <option th:value="null">-- Без прив'язки --</option>
+                                <option th:each="m : ${materials}" th:value="${m.id}" th:text="${m.name}"></option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <div id="imagePreview"
+                                 style="width: 100%; height: 140px; border: 2px dashed rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 15px; background: rgba(0,0,0,0.2);">
+                                <span style="color: #a0aec0;">Прев'ю зображення</span>
+                            </div>
+
+                            <label>Тип завдання</label>
+                            <select th:field="*{type}" id="taskTypeSelect" required>
+                                <option th:each="t : ${types}" th:value="${t}" th:text="${t}"></option>
+                            </select>
+
+                            <label>Складність</label>
+                            <select th:field="*{difficulty}">
+                                <option th:each="d : ${difficulties}" th:value="${d}" th:text="${d}"></option>
+                            </select>
+
+                            <label>Локація випробування *</label>
+                            <select th:field="*{location}" id="locationSelect" required onchange="onLocationChange()">
+                                <option th:value="null" disabled selected th:selected="${task.location == null}">-- Оберіть локацію --</option>
+                                <option th:each="loc : ${locations}" th:value="${loc.id}" th:text="${loc.name}"></option>
+                            </select>
+
+                            <label>Порядковий номер</label>
+                            <input type="number" th:field="*{orderIndex}" required>
+                            <small style="color: #4facfe; display: block; margin-top: 5px;">
+                                Зайняті номери: <span id="indicesList" th:text="${occupiedIndices}"></span>
+                            </small>
+                        </div>
+                    </div>
+
+                    <div id="answersContainer">
+                        <h3 style="color: #4facfe;">Налаштування відповідей</h3>
+
+                        <div id="choiceBlock" class="answer-type-block">
+                            <div id="choiceList">
+                                <div th:each="ans : ${task.answers}"
+                                     th:if="${task.type != null and (task.type.name() == 'SINGLE_CHOICE' or task.type.name() == 'MULTIPLE_CHOICE')}"
+                                     class="dynamic-row">
+                                    <input type="text" name="choiceText" th:value="${ans.text}" placeholder="Варіант відповіді" required>
+                                    <input type="hidden" name="choiceCorrectHidden" th:value="${ans.correct}">
+                                    <input type="checkbox" class="choice-checkbox" th:checked="${ans.correct}"
+                                           onchange="this.previousElementSibling.value = this.checked">
+                                    <button type="button" onclick="this.parentElement.remove()" class="btn-delete-small">✕</button>
+                                </div>
+                            </div>
+                            <button type="button" onclick="addChoiceRow()" class="btn-add" style="background: #2d3748; width: auto;">+ Додати варіант</button>
+                        </div>
+
+                        <div id="matchingBlock" class="answer-type-block" style="display:none;">
+                            <div id="matchingList">
+                                <div th:each="ans : ${task.answers}" th:if="${task.type != null and task.type.name() == 'MATCHING'}" class="dynamic-row">
+                                    <input type="text" name="leftText" th:value="${ans.leftText}" placeholder="Термін" required>
+                                    <span style="color: #4facfe;">↔</span>
+                                    <input type="text" name="rightText" th:value="${ans.rightText}" placeholder="Значення" required>
+                                    <button type="button" onclick="this.parentElement.remove()" class="btn-delete-small">✕</button>
+                                </div>
+                            </div>
+                            <button type="button" onclick="addMatchingRow()" class="btn-add" style="background: #2d3748; width: auto;">+ Додати пару</button>
+                        </div>
+
+                        <div id="orderBlock" class="answer-type-block" style="display:none;">
+                            <div id="orderList">
+                                <div th:each="ans, stat : ${task.answers}" th:if="${task.type != null and task.type.name() == 'ORDER'}" class="dynamic-row">
+                                    <div class="order-number" style="background: #4facfe; color: black; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;" th:text="${stat.count}">1</div>
+                                    <input type="text" name="orderText" th:value="${ans.text}" placeholder="Етап" required>
+                                    <input type="hidden" name="correctOrder" th:value="${ans.correctOrder}">
+                                    <button type="button" onclick="removeOrderRow(this)" class="btn-delete-small">✕</button>
+                                </div>
+                            </div>
+                            <button type="button" onclick="addOrderRow()" class="btn-add" style="background: #2d3748; width: auto;">+ Додати етап</button>
+                        </div>
+
+                        <div id="textBlock" class="answer-type-block" style="display:none;">
+                            <div th:each="ans : ${task.answers}" th:if="${task.type != null and task.type.name() == 'TEXT'}">
+                                <label>Правильна текстова відповідь</label>
+                                <input type="text" name="textAnswerValue" th:value="${ans.correctAnswer}" placeholder="Введіть відповідь" required>
+                            </div>
+                            <div th:if="${task.id == null}">
+                                <label>Правильна текстова відповідь</label>
+                                <input type="text" name="textAnswerValue" placeholder="Введіть відповідь" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 25px; display: flex; gap: 15px;">
+                        <button type="submit" style="flex: 1;">Зберегти випробування</button>
+                        <a th:href="@{/admin/tasks}" style="line-height: 50px; color: #a0aec0; padding: 0 20px;">Скасувати</a>
+                    </div>
+                </form>
+            </div>
+        </main>
+
+        <script>
+            const imgInput = document.getElementById('imageUrlInput');
+            const preview = document.getElementById('imagePreview');
+            function updatePreview() {
+                if (imgInput.value) {
+                    preview.innerHTML = `<img src="${imgInput.value}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                } else {
+                    preview.innerHTML = '<span style="color: #a0aec0;">Прев\'ю зображення</span>';
+                }
+            }
+            imgInput.addEventListener('input', updatePreview);
+            window.addEventListener('DOMContentLoaded', updatePreview);
+
+            const typeSelect = document.getElementById('taskTypeSelect');
+            function updateAnswerBlocks() {
+                const val = typeSelect.value;
+                const blocks = document.querySelectorAll('.answer-type-block');
+                let activeBlockId = '';
+                if (val === 'SINGLE_CHOICE' || val === 'MULTIPLE_CHOICE') activeBlockId = 'choiceBlock';
+                else if (val === 'MATCHING') activeBlockId = 'matchingBlock';
+                else if (val === 'ORDER') activeBlockId = 'orderBlock';
+                else if (val === 'TEXT') activeBlockId = 'textBlock';
+                blocks.forEach(block => {
+                    const isVisible = block.id === activeBlockId;
+                    block.style.display = isVisible ? 'block' : 'none';
+                    block.querySelectorAll('input, select, textarea').forEach(field => { field.disabled = !isVisible; });
+                });
+            }
+            typeSelect.addEventListener('change', updateAnswerBlocks);
+            window.addEventListener('DOMContentLoaded', updateAnswerBlocks);
+
+            async function onLocationChange() {
+                const locationId = document.getElementById('locationSelect').value;
+                const indicesSpan = document.getElementById('indicesList');
+                const materialSelect = document.getElementById('materialSelect');
+
+                if (!locationId || locationId === 'null') return;
+
+                try {
+                    const idxRes = await fetch(`/admin/tasks/occupied-indices?locationId=${locationId}`);
+                    const indices = await idxRes.json();
+                    indicesSpan.innerText = indices.length > 0 ? indices.join(', ') : 'всі вільні';
+
+                    const matRes = await fetch(`/admin/tasks/materials-by-location?locationId=${locationId}`);
+                    const materials = await matRes.json();
+
+                    materialSelect.innerHTML = '<option value="">-- Без прив\'язки --</option>';
+                    materials.forEach(mat => {
+                        const option = document.createElement('option');
+                        option.value = mat.id;
+                        option.text = mat.name;
+                        materialSelect.appendChild(option);
+                    });
+
+                } catch (error) {
+                    console.error("Помилка оновлення даних:", error);
+                }
+            }
+
+            function addChoiceRow() {
+                const container = document.getElementById('choiceList');
+                const div = document.createElement('div');
+                div.className = "dynamic-row";
+                div.innerHTML = `<input type="text" name="choiceText" placeholder="Варіант відповіді" required><input type="hidden" name="choiceCorrectHidden" value="false"><input type="checkbox" class="choice-checkbox" onchange="this.previousElementSibling.value = this.checked"><button type="button" onclick="this.parentElement.remove()" class="btn-delete-small">✕</button>`;
+                container.appendChild(div);
+            }
+            function addMatchingRow() {
+                const container = document.getElementById('matchingList');
+                const div = document.createElement('div');
+                div.className = "dynamic-row";
+                div.innerHTML = `<input type="text" name="leftText" placeholder="Термін" required><span>↔</span><input type="text" name="rightText" placeholder="Значення" required><button type="button" onclick="this.parentElement.remove()" class="btn-delete-small">✕</button>`;
+                container.appendChild(div);
+            }
+            function addOrderRow() {
+                const container = document.getElementById('orderList');
+                const index = container.children.length + 1;
+                const div = document.createElement('div');
+                div.className = "dynamic-row";
+                div.innerHTML = `<div class="order-number">${index}</div><input type="text" name="orderText" placeholder="Опис етапу..." required><input type="hidden" name="correctOrder" value="${index}"><button type="button" onclick="removeOrderRow(this)" class="btn-delete-small">✕</button>`;
+                container.appendChild(div);
+            }
+            function removeOrderRow(btn) {
+                const container = document.getElementById('orderList');
+                btn.parentElement.remove();
+                Array.from(container.children).forEach((row, i) => {
+                    row.querySelector('.order-number').innerText = i + 1;
+                    row.querySelector('input[type="hidden"]').value = i + 1;
+                });
+            }
+
+            window.addEventListener('DOMContentLoaded', () => {
+                const choiceList = document.getElementById('choiceList');
+                if (choiceList.children.length === 0 && !document.querySelector('input[name="id"]').value) {
+                    addChoiceRow();
+                }
+            });
+        </script>
+    </div>
+</div>
+</body>
+</html>
