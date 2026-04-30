@@ -12,7 +12,7 @@
     <div class="admin-layout">
         <aside class="sidebar">
             <ul class="sidebar-menu">
-                <li th:class="${activeTab == 'users' ? 'active' : ''}" >
+                <li th:class="${activeTab == 'users' ? 'active' : ''}">
                     <a th:href="@{/admin/users}">Користувачі</a>
                 </li>
                 <li th:class="${activeTab == 'locations' ? 'active' : ''}">
@@ -21,10 +21,12 @@
                 <li th:class="${activeTab == 'categories' ? 'active' : ''}">
                     <a th:href="@{/admin/categories}">Категорії матеріалів</a>
                 </li>
-                <li  th:class="${activeTab == 'materials' ? 'active' : ''}">
+                <li th:class="${activeTab == 'materials' ? 'active' : ''}">
                     <a th:href="@{/admin/materials}">Матеріали</a>
                 </li>
-                <li><a href="#">Завдання</a></li>
+                <li th:class="${activeTab == 'tasks' ? 'active' : ''}">
+                    <a th:href="@{/admin/tasks}">Завдання</a>
+                </li>
             </ul>
         </aside>
 
@@ -62,7 +64,7 @@
                         <a th:href="@{/admin/locations/edit/{id}(id=${loc.id})}" class="btn-edit">Редагувати</a>
                         <a th:href="@{/admin/locations/delete/{id}(id=${loc.id})}"
                            class="btn-delete"
-                           onclick="return confirm('Видалити цю систему з карти?')">Видалити</a>
+                           onclick="return confirm('Видалити цю систему з карти?')">Вилучити</a>
                     </td>
                 </tr>
                 </tbody>

@@ -11,6 +11,7 @@ import java.util.Set;
 
 public interface MaterialRepository extends JpaRepository<Material, Long> {
     List<Material> findByNameContainingIgnoreCase(String name);
+    List<Material> findByLocation_Id(Long locationId);
     List<Material> findByCategories(Set<MaterialCategory> categories);
     @Query(""" 
             SELECT DISTINCT m FROM Material m LEFT JOIN m.categories c

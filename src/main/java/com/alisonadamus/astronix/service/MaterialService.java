@@ -16,6 +16,14 @@ public class MaterialService {
         return repository.findByFilters(name, locId, catId);
     }
 
+    public List<Material> getByLocation(Long locId) {
+        return repository.findByLocation_Id(locId);
+    }
+
+    public List<Material> getAll() {
+        return repository.findAll();
+    }
+
     public Material getById(Long id) {
         return repository.findById(id).orElse(new Material());
     }

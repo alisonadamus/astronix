@@ -54,19 +54,96 @@
                         </small>
                     </div>
 
-                    <div style="margin-bottom: 20px;">
-                        <label style="color: #4facfe; font-weight: 600;">контент (Markdown)</label>
+
+                    <div class="material-content" style="margin-bottom: 20px; display: block;">
+                        <label style="color: #4facfe; font-weight: 600;">Контент</label>
                         <textarea th:field="*{content}" id="markdown-editor"></textarea>
                     </div>
 
+
                     <div style="display: flex; gap: 15px;">
                         <button type="submit">Зберегти зміни</button>
-                        <a th:href="@{/admin/materials}" style="line-height: 50px; color: #a0aec0; text-decoration: none;">Скасувати</a>
+                        <a th:href="@{/admin/materials}"
+                           style="line-height: 50px; color: #a0aec0; text-decoration: none;">Скасувати</a>
                     </div>
                 </form>
             </div>
         </main>
 
+        <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+        <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const markdownField = document.getElementById('markdown-editor');
+
+                if (markdownField) {
+                    const easyMDE = new EasyMDE({
+                        element: markdownField,
+                        spellChecker: false,
+                        autosave: {
+                            enabled: false
+                        },
+                        status: ["lines", "words"],
+                        forceSync: true,
+                        minHeight: "300px",
+                        toolbar: [
+                            "bold", "italic", "heading", "|",
+                            "quote", "unordered-list", "ordered-list", "|",
+                            "link", "image", "table", "|",
+                            "preview", "side-by-side", "fullscreen", "|",
+                            "guide"
+                        ]
+                    });
+                }
+            });
+        </script>
+
+        <style>
+            .editor-toolbar, .CodeMirror, .editor-preview-side {
+                width: 100% !important;
+                box-sizing: border-box;
+            }
+
+            .editor-toolbar {
+                display: flex !important;
+                flex-wrap: wrap;
+                border-top-left-radius: 8px;
+                border-top-right-radius: 8px;
+                padding: 6px !important;
+            }
+
+            .editor-toolbar button:hover, .editor-toolbar button.active {
+                background: rgba(79, 172, 254, 0.2) !important;
+                color: #4facfe !important;
+                border: none !important;
+            }
+
+            .editor-preview, .editor-preview-side {
+                background: #0d1117 !important;
+                color: white !important;
+            }
+
+            .editor-toolbar button {
+                margin: 2px !important;
+                width: 32px !important;
+                height: 32px !important;
+            }
+
+            .CodeMirror {
+                background: rgba(0, 0, 0, 0.2) !important;
+                color: white !important;
+                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                border-bottom: none !important;
+                border-bottom-left-radius: 8px;
+                border-bottom-right-radius: 8px;
+                min-height: 300px !important;
+            }
+
+            .CodeMirror-selected {
+                background: rgba(79, 172, 254, 0.3) !important;
+            }
+        </style>
     </div>
 </div>
 </body>

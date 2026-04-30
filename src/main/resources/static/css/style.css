@@ -454,3 +454,52 @@ select {
     color: white;
 }
 
+
+.dynamic-row input[type="text"] {
+    flex: 1;
+    min-width: 200px;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+}
+
+.choice-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: #4facfe;
+    cursor: pointer;
+    background: transparent;
+}
+
+.btn-delete-small {
+    background: rgba(255, 107, 107, 0.15);
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+    border-radius: 6px;
+    padding: 8px 15px;
+    width: auto !important;
+    cursor: pointer;
+    transition: all 0.3s;
+    line-height: 1;
+}
+
+.btn-delete-small:hover {
+    background: #ff6b6b;
+    color: white;
+}
+
+.dynamic-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 12px;
+    align-items: center;
+    width: 100%;
+}
+
+.material-content img {
+    max-width: 80%;
+    height: auto;
+    border-radius: 10px;
+    display: block;
+    margin: 20px auto;
+}

@@ -69,9 +69,9 @@
                     </td>
                     <td th:text="${m.estimatedTime}"></td>
                     <td>
-                        <a th:href="@{/admin/materials/edit/{id}(id=${m.id})}" class="btn-edit">Ред.</a>
+                        <a th:href="@{/admin/materials/edit/{id}(id=${m.id})}" class="btn-edit">Редагувати</a>
                         <a th:href="@{/admin/materials/delete/{id}(id=${m.id})}" class="btn-delete"
-                           onclick="return confirm('Видалити?')">Видалити</a>
+                           onclick="return confirm('Видалити?')">Вилучити</a>
                     </td>
                 </tr>
                 </tbody>

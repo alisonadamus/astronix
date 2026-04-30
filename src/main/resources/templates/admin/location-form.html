@@ -14,28 +14,58 @@
         <main class="admin-content">
             <h2 th:text="${location.id == null ? 'Відкрити нову локацію' : 'Коригування координат'}"></h2>
 
-            <div class="auth-container" style="max-width: 600px; margin: 0; text-align: left;">
+            <div class="auth-container" style="max-width: 800px; margin: 0; text-align: left;">
                 <form th:action="@{/admin/locations/save}" th:object="${location}" method="post">
                     <input type="hidden" th:field="*{id}">
 
-                    <label>Назва системи / планети</label>
-                    <input type="text" th:field="*{name}" required placeholder="Напр: Альфа Центавра">
+                    <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px;">
+                        <div>
+                            <label>Назва системи / планети</label>
+                            <input type="text" th:field="*{name}" required placeholder="Напр: Альфа Центавра">
 
-                    <label>URL зображення (планета)</label>
-                    <input type="text" th:field="*{imageUrl}" placeholder="https://image-link.com/planet.png">
+                            <label>URL зображення (планета)</label>
+                            <input type="text" th:field="*{imageUrl}" id="locImageUrl" placeholder="https://image-link.com/planet.png">
 
-                    <label>Опис локації</label>
-                    <textarea th:field="*{description}" rows="5"
-                              style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: white; padding: 10px; font-family: inherit; margin-bottom: 20px;"></textarea>
+                            <label>Опис локації</label>
+                            <textarea th:field="*{description}" rows="5"
+                                      style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: white; padding: 10px; font-family: inherit; margin-bottom: 20px;"></textarea>
+                        </div>
 
-                    <div style="display: flex; gap: 10px;">
-                        <button type="submit">Зберегти в базу</button>
-                        <a th:href="@{/admin/locations}" style="text-align: center; line-height: 50px; color: #a0aec0;">Скасувати</a>
+                        <div>
+                            <label>Візуалізація об'єкту</label>
+                            <div id="locImagePreview"
+                                 style="width: 100%; aspect-ratio: 1/1; border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: rgba(0,0,0,0.2);">
+                                <span style="color: #a0aec0; text-align: center; padding: 20px;">Зображення відсутнє</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 15px; margin-top: 20px;">
+                        <button type="submit" style="flex: 1;">Зберегти в базу</button>
+                        <a th:href="@{/admin/locations}" style="text-align: center; line-height: 50px; color: #a0aec0; padding: 0 20px;">Скасувати</a>
                     </div>
                 </form>
             </div>
         </main>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imgInput = document.getElementById('locImageUrl');
+            const preview = document.getElementById('locImagePreview');
+
+            function updateLocPreview() {
+                if (imgInput.value.trim()) {
+                    preview.innerHTML = `<img src="${imgInput.value}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                } else {
+                    preview.innerHTML = '<span style="color: #a0aec0;">Прев\'ю зображення</span>';
+                }
+            }
+
+            imgInput.addEventListener('input', updateLocPreview);
+            updateLocPreview();
+        });
+    </script>
 </div>
 </body>
 </html>

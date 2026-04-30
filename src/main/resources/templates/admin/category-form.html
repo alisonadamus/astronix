@@ -14,27 +14,72 @@
         <main class="admin-content">
             <h2 th:text="${category.id == null ? 'Створення нової категорії' : 'Редагування категорії'}"></h2>
 
-            <div class="auth-container" style="max-width: 500px; margin: 0; text-align: left;">
+            <div class="auth-container" style="max-width: 700px; margin: 0; text-align: left;">
                 <form th:action="@{/admin/categories/save}" th:object="${category}" method="post">
                     <input type="hidden" th:field="*{id}">
 
-                    <label>Назва категорії</label>
-                    <input type="text" th:field="*{name}" required placeholder="Теорія...">
+                    <div style="display: grid; grid-template-columns: 1fr 180px; gap: 30px; align-items: start;">
+                        <div>
+                            <label>Назва категорії</label>
+                            <input type="text" th:field="*{name}" required placeholder="Напр: Квантова фізика">
 
-                    <label>Іконка (Emoji або URL)</label>
-                    <input type="text" th:field="*{icon}" placeholder="https://image-link.com/theory.png">
-                    <p style="font-size: 0.8rem; color: #a0aec0; margin-top: -15px; margin-bottom: 20px;">
-                        Використовуйте смайли або символи для швидкої ідентифікації.
-                    </p>
+                            <label>Іконка (Emoji або URL)</label>
+                            <input type="text" th:field="*{icon}" id="categoryIconInput"
+                                   placeholder="🚀 або https://.../icon.png">
+                            <p style="font-size: 0.8rem; color: #a0aec0; margin-top: 5px; margin-bottom: 20px;">
+                                Вставте смайлик або пряме посилання на зображення.
+                            </p>
+                        </div>
 
-                    <div style="display: flex; gap: 10px;">
+                        <div style="text-align: center;">
+                            <label>Вигляд</label>
+                            <div id="categoryIconPreview"
+                                 style="width: 120px; height: 120px; background: rgba(255,255,255,0.05);
+                                        border: 2px dashed rgba(255,255,255,0.2); border-radius: 15px;
+                                        display: flex; align-items: center; justify-content: center;
+                                        margin: 0 auto; overflow: hidden; font-size: 50px;">
+                                <span style="color: #4a5568; font-size: 1rem;">Пусто</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
                         <button type="submit">Зберегти категорію</button>
-                        <a th:href="@{/admin/categories}" style="text-align: center; line-height: 50px; color: #a0aec0;">Назад</a>
+                        <a th:href="@{/admin/categories}" style="text-align: center; line-height: 50px; color: #a0aec0; padding: 0 15px;">Назад</a>
                     </div>
                 </form>
             </div>
         </main>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const iconInput = document.getElementById('categoryIconInput');
+            const preview = document.getElementById('categoryIconPreview');
+
+            function updateIconPreview() {
+                const val = iconInput.value.trim();
+
+                if (!val) {
+                    preview.innerHTML = '<span style="color: #4a5568; font-size: 0.9rem;">Пусто</span>';
+                    return;
+                }
+
+                const isUrl = val.startsWith('http://') || val.startsWith('https://') || val.startsWith('/');
+
+                if (isUrl) {
+                    preview.innerHTML = `<img src="${val}"
+                                 style="width: 80%; height: 80%; object-fit: contain;"
+                                 onerror="this.parentElement.innerHTML='<span style=\'font-size:0.8rem; color:#ff6b6b\'>Помилка URL</span>'">`;
+                } else {
+                    preview.innerHTML = `<span style="line-height: 1;">${val}</span>`;
+                }
+            }
+
+            iconInput.addEventListener('input', updateIconPreview);
+            updateIconPreview();
+        });
+    </script>
 </div>
 </body>
 </html>
