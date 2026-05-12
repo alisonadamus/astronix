@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<html th:replace="~{layout :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title th:text="${material.name} + ' - База знань'"></title>
+    <!-- Підключаємо стилі для відображення Markdown (наприклад, GitHub style) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-dark.min.css">
+    <style>
+        .markdown-body {
+            background-color: transparent !important;
+            color: #cbd5e0 !important;
+            font-family: inherit;
+        }
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            color: #4facfe !important;
+            border-bottom: 1px solid rgba(79, 172, 254, 0.2) !important;
+        }
+        #reading-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+<div id="main-content" style="width: 100%; padding: 0;">
+    <div id="reading-progress"></div>
+    <nav class="navbar" th:replace="~{locations :: .navbar}"></nav>
+
+    <div style="max-width: 900px; margin: 0 auto; padding: 40px 20px;">
+
+        <!-- Кнопка назад до локації -->
+        <div style="margin-bottom: 30px;">
+            <a th:href="@{/locations/{id}(id=${material.location.id})}"
+               style="color: #a0aec0; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                <span>←</span> Повернутися до <span th:text="${material.location.name}" style="color: #4facfe;">Локації</span>
+            </a>
+        </div>
+
+        <article>
+            <!-- Заголовок та категорії -->
+            <header style="margin-bottom: 40px;">
+                <h1 th:text="${material.name}" style="font-size: 3rem; color: white; margin-bottom: 20px; line-height: 1.2;"></h1>
+
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <div th:each="cat : ${material.categories}"
+                         style="display: flex; align-items: center; gap: 8px; background: rgba(79, 172, 254, 0.1); border: 1px solid rgba(79, 172, 254, 0.2); padding: 5px 12px; border-radius: 20px;">
+
+                        <div style="width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">
+                            <img th:if="${cat.icon.startsWith('http') or cat.icon.startsWith('/')}"
+                                 th:src="${cat.icon}" style="width: 100%; height: 100%; object-fit: contain;">
+                            <span th:unless="${cat.icon.startsWith('http') or cat.icon.startsWith('/')}"
+                                  th:text="${cat.icon}" style="font-size: 1rem;"></span>
+                        </div>
+                        <span th:text="${cat.name}" style="color: #4facfe; font-size: 0.9rem; font-weight: 500;"></span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="markdown-body" id="content-area" th:utext="${material.content}">
+            </div>
+        </article>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 50px 0;">
+
+        <a th:href="@{/locations/{id}(id=${material.location.id})}"
+           style="background: #4facfe; color: black; padding: 12px 25px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+            До списку завдань
+        </a>
+    </div>
+</div>
+
+<script>
+    // Скрипт для прогрес-бару читання
+    window.onscroll = function() {
+        let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        let scrolled = (winScroll / height) * 100;
+        document.getElementById("reading-progress").style.width = scrolled + "%";
+    };
+</script>
+</body>
+</html>
