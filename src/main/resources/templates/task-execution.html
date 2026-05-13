@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="uk">
+<html th:replace="~{layout :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title th:text="'Завдання - ' + ${task.location.name}"></title>
+</head>
+<body>
+<div id="main-content" style="max-width: 800px; margin: 40px auto; padding: 20px;">
+
+    <a th:href="@{/locations/{id}(id=${task.location.id})}" style="color: #a0aec0; text-decoration: none; margin-bottom: 20px; display: inline-block;">
+        ← Повернутися до локації
+    </a>
+
+    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 30px; margin-bottom: 30px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+            <span style="color: #4facfe; font-weight: bold;" th:text="${task.type.name}">Тип завдання</span>
+            <div>
+                <span style="color: #a0aec0; font-size: 0.9rem;">Спроби: <span id="attempts-count" th:text="${result != null ? result.attempts : 0}"></span></span>
+                <span th:if="${result != null and result.completed}" style="color: #48bb78; margin-left: 15px; font-weight: bold;">✓ Виконано</span>
+            </div>
+        </div>
+
+        <div th:if="${task.getMaterial() != null}" style="margin-bottom: 15px;">
+            <a th:href="@{/materials/{id}(id=${task.material.id})}"
+               target="_blank"
+               style="color: #4facfe; text-decoration: none; font-size: 0.9rem; display: flex; align-items: center; gap: 5px;">
+                Читати матеріал за темою
+            </a>
+        </div>
+
+        <h2 th:text="${task.question}" style="color: white; margin-bottom: 20px;">Питання?</h2>
+
+        <div th:if="${task.imageUrl != null}" style="text-align: center; margin-bottom: 20px;">
+            <img th:src="${task.imageUrl}"
+                 style="max-width: 60%; max-height: 300px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); object-fit: contain;">
+        </div>
+
+        <form id="task-form">
+            <input type="hidden" id="taskId" th:value="${task.id}">
+            <input type="hidden" id="taskType" th:value="${task.type.name()}">
+
+            <th:block th:switch="${task.type.name()}">
+
+                <div th:case="'SINGLE_CHOICE'" style="display: flex; flex-direction: column; gap: 10px;">
+                    <label th:each="answer : ${displayAnswers}" style="display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);">
+                        <input type="radio" name="choice" th:value="${answer.id}" style="accent-color: #4facfe; width: 18px; height: 18px;">
+                        <span th:text="${answer.text}" style="color: white;"></span>
+                    </label>
+                </div>
+
+                <div th:case="'MULTIPLE_CHOICE'" style="display: flex; flex-direction: column; gap: 10px;">
+                    <label th:each="answer : ${displayAnswers}" style="display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);">
+                        <input type="checkbox" name="choice" th:value="${answer.id}" style="accent-color: #4facfe; width: 18px; height: 18px;">
+                        <span th:text="${answer.text}" style="color: white;"></span>
+                    </label>
+                </div>
+
+                <div th:case="'TEXT'">
+                    <input type="text" id="text-answer" placeholder="Введіть вашу відповідь..."
+                           style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 15px; border-radius: 10px; font-size: 1rem;">
+                </div>
+
+                <div th:case="'ORDER'">
+                    <p style="color: #a0aec0; font-size: 0.9rem; margin-bottom: 15px;">Перетягніть елементи, щоб розмістити їх у правильному порядку.</p>
+                    <div id="sortable-list" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div th:each="answer : ${displayAnswers}" th:data-id="${answer.id}" class="sortable-item"
+                             style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border: 1px solid rgba(79, 172, 254, 0.3); color: white; cursor: grab; display: flex; align-items: center; gap: 15px;">
+                            <span style="color: #4facfe;">☰</span>
+                            <span th:text="${answer.text}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:case="'MATCHING'" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div th:each="answer : ${displayAnswers}" style="display: flex; align-items: center; gap: 20px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1);">
+                        <div style="flex: 1; color: white; font-weight: bold;" th:text="${answer.leftText}">Ліва частина</div>
+                        <div style="color: #4facfe;">→</div>
+                        <select class="matching-select" th:data-id="${answer.id}" style="flex: 1; background: #1a202c; color: white; border: 1px solid rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">
+                            <option value="" disabled selected>Оберіть відповідність</option>
+                            <option th:each="opt : ${rightOptions}" th:value="${opt}" th:text="${opt}"></option>
+                        </select>
+                    </div>
+                </div>
+
+            </th:block>
+
+            <button type="submit" style="margin-top: 30px; width: 100%; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: black; font-weight: bold; padding: 15px; border: none; border-radius: 10px; cursor: pointer; font-size: 1.1rem;">
+                Відповісти
+            </button>
+        </form>
+
+        <div id="result-message" style="display: none; margin-top: 20px; padding: 20px; border-radius: 10px; font-weight: bold;"></div>
+
+        <div id="explanation-box" style="display: none; text-align:center; margin-top: 20px; padding: 20px; background: rgba(79, 172, 254, 0.1); border-left: 4px solid #4facfe; border-radius: 0 10px 10px 0; color: #cbd5e0;">
+            <strong style="color: #4facfe; display: block; margin-bottom: 10px; ">Пояснення:</strong>
+            <span id="explanation-text"></span>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+        <script th:inline="javascript">
+
+            const token = document.querySelector('meta[name="_csrf"]').content;
+            const header = document.querySelector('meta[name="_csrf_header"]').content;
+
+            const el = document.getElementById('sortable-list');
+            if (el) {
+                Sortable.create(el, {
+                    animation: 150,
+                    ghostClass: 'sortable-ghost'
+                });
+            }
+
+            document.getElementById('task-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const locationUrl = /*[[@{/locations/{id}(id=${task.location.id})}]]*/ '';
+
+                const taskId = document.getElementById('taskId').value;
+                const taskType = document.getElementById('taskType').value;
+                const payload = { answerIds: [], textAnswer: null, matchingAnswers: {} };
+
+
+                if (taskType === 'SINGLE_CHOICE') {
+                    const selected = document.querySelector('input[name="choice"]:checked');
+                    if (selected) payload.answerIds.push(parseInt(selected.value));
+                }
+                else if (taskType === 'MULTIPLE_CHOICE') {
+                    document.querySelectorAll('input[name="choice"]:checked').forEach(cb => {
+                        payload.answerIds.push(parseInt(cb.value));
+                    });
+                }
+                else if (taskType === 'TEXT') {
+                    payload.textAnswer = document.getElementById('text-answer').value;
+                }
+                else if (taskType === 'ORDER') {
+                    document.querySelectorAll('#sortable-list .sortable-item').forEach(item => {
+                        payload.answerIds.push(parseInt(item.getAttribute('data-id')));
+                    });
+                }
+                else if (taskType === 'MATCHING') {
+                    document.querySelectorAll('.matching-select').forEach(select => {
+                        const id = parseInt(select.getAttribute('data-id'));
+                        if (select.value) payload.matchingAnswers[id] = select.value;
+                    });
+                }
+
+                fetch(`/tasks/${taskId}/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        [header]: token
+                    },
+                    body: JSON.stringify(payload)
+                })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(data => {
+                        const msgBox = document.getElementById('result-message');
+                        const explanationBox = document.getElementById('explanation-box');
+                        const explanationText = document.getElementById('explanation-text');
+                        const submitBtn = document.querySelector('button[type="submit"]');
+
+                        msgBox.style.display = 'block';
+                        msgBox.innerText = data.message;
+
+                        if (data.correct) {
+                            msgBox.style.background = 'rgba(72, 187, 120, 0.2)';
+                            msgBox.style.color = '#48bb78';
+
+                            if (data.explanation) {
+                                explanationText.innerText = data.explanation;
+                                explanationBox.style.display = 'block';
+                            }
+
+                            if (submitBtn) {
+                                submitBtn.setAttribute('style', 'display: none !important');
+                            }
+
+                            setTimeout(() => {
+                                if (locationUrl) {
+                                    window.location.href = locationUrl;
+                                } else {
+                                    const backLink = document.querySelector('a[href*="/locations/"]');
+                                    window.location.href = backLink.href;
+                                }
+                            }, 3000);
+
+                        } else {
+                            msgBox.style.background = 'rgba(245, 101, 101, 0.2)';
+                            msgBox.style.color = '#f56565';
+                            document.getElementById('attempts-count').innerText = data.attempts;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert("Сталася помилка при відправці: " + error.message);
+                    });
+            });
+        </script>
+
+        <style>
+            .sortable-ghost { opacity: 0.4; background: #4facfe !important; }
+            .sortable-item { cursor: grab; touch-action: none; }
+        </style>
+
+    </div>
+</div>
+</body>
+</html>
