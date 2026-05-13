@@ -30,20 +30,30 @@
             <div style="flex: 1; min-width: 300px;">
                 <h1 th:text="${location.name}" style="margin: 0 0 15px 0; color: white; font-size: 2.8rem;">Назва</h1>
 
-                <!-- Вирівнювання по ширині -->
                 <p th:text="${location.description}"
                    style="color: #cbd5e0; line-height: 1.7; margin-bottom: 25px; font-size: 1.1rem; text-align: justify;"></p>
-
-                <a th:href="@{/map(locationId=${location.id})}"
-                   style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: #000; padding: 12px 30px; border-radius: 30px; font-weight: bold; text-decoration: none;">
-                    Відкрити 3D-карту
-                </a>
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 40px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 40px;">
+
+            <!-- СЕКЦІЯ МАТЕРІАЛІВ -->
             <div>
-                <h2 style="color: #4facfe; border-bottom: 2px solid rgba(79, 172, 254, 0.2); padding-bottom: 12px; margin-bottom: 25px;">База знань</h2>
+                <h2 style="color: #4facfe; border-bottom: 2px solid rgba(79, 172, 254, 0.2); padding-bottom: 12px; margin-bottom: 20px;">База знань</h2>
+
+                <!-- Фільтри матеріалів -->
+                <form th:action="@{/locations/{id}(id=${location.id})}" method="get" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <input type="text" name="materialSearch" th:value="${materialSearch}" placeholder="Пошук матеріалу..."
+                           style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 8px 15px; border-radius: 8px;">
+
+                    <select name="categoryId" style="flex: 1; background: #1a202c; color: white; border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 8px;">
+                        <option value="">Всі категорії</option>
+                        <option th:each="cat : ${allCategories}" th:value="${cat.id}" th:text="${cat.name}"
+                                th:selected="${cat.id == selectedCategoryId}"></option>
+                    </select>
+
+                    <button type="submit" style="background: #4facfe; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;">Пошук</button>
+                </form>
 
                 <div style="display: flex; flex-direction: column; gap: 15px;">
                     <a th:each="m : ${materials}" th:href="@{/materials/{id}(id=${m.id})}"
@@ -71,21 +81,55 @@
                 </div>
             </div>
 
+            <!-- СЕКЦІЯ ЗАВДАНЬ -->
             <div>
-                <h2 style="color: #4facfe; border-bottom: 2px solid rgba(79, 172, 254, 0.2); padding-bottom: 12px; margin-bottom: 25px;">Випробування</h2>
+                <h2 style="color: #4facfe; border-bottom: 2px solid rgba(79, 172, 254, 0.2); padding-bottom: 12px; margin-bottom: 20px;">Випробування</h2>
+
+                <!-- Фільтри завдань -->
+                <form th:action="@{/locations/{id}(id=${location.id})}" method="get" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <select name="taskType" style="flex: 1; background: #1a202c; color: white; border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 8px;">
+                        <option value="">Всі типи</option>
+                        <option th:each="type : ${taskTypes}" th:value="${type}" th:text="${type.name}"
+                                th:selected="${type == selectedTaskType}"></option>
+                    </select>
+
+                    <select name="difficulty" style="flex: 1; background: #1a202c; color: white; border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 8px;">
+                        <option value="">Будь-яка складність</option>
+                        <option th:each="diff : ${difficulties}" th:value="${diff}" th:text="${diff.name}"
+                                th:selected="${diff == selectedDifficulty}"></option>
+                    </select>
+
+                    <button type="submit" style="background: #4facfe; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;">Пошук</button>
+                </form>
+
                 <div style="display: flex; flex-direction: column; gap: 15px;">
                     <a th:each="t : ${tasks}" th:href="@{/tasks/{id}(id=${t.id})}"
                        style="display: flex; align-items: center; gap: 20px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); padding: 15px 20px; border-radius: 12px; text-decoration: none; color: white;">
+
                         <div style="background: rgba(79, 172, 254, 0.15); color: #4facfe; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid rgba(79, 172, 254, 0.3);"
                              th:text="${t.orderIndex}">1</div>
-                        <div>
+
+                        <div style="flex: 1;">
                             <div style="font-weight: 600;" th:text="'Місія ' + ${t.orderIndex}"></div>
-                            <div style="color: #a0aec0; font-size: 0.85rem;" th:text="${t.type}"></div>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
+                                <!-- Рівень складності -->
+                                <span th:text="${t.difficulty.name}"
+                                      th:style="'font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; border: 1px solid; ' +
+                              (${t.difficulty.name() == 'EASY'} ? 'color: #48bb78; border-color: #48bb78;' :
+                               (${t.difficulty.name() == 'MEDIUM'} ? 'color: #ecc94b; border-color: #ecc94b;' : 'color: #f56565; border-color: #f56565;'))">
+                        </span>
+                                <span style="color: #718096; font-size: 0.8rem;">•</span>
+                                <span style="color: #a0aec0; font-size: 0.85rem;" th:text="${t.type.name}"></span>
+                            </div>
                         </div>
                     </a>
+                    <p th:if="${#lists.isEmpty(tasks)}" style="color: #718096; text-align: center;">Завдань не знайдено</p>
                 </div>
             </div>
         </div>
+
+
+
     </div>
 </div>
 </body>

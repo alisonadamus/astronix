@@ -22,4 +22,9 @@ public interface MaterialRepository extends JpaRepository<Material, Long> {
     List<Material> findByFilters(@Param("name") String name,
                                  @Param("locId") Long locId,
                                  @Param("catId") Long catId);
+    @Query("SELECT DISTINCT m FROM Material m LEFT JOIN m.categories c " +
+            "WHERE m.location.id = :locId " +
+            "AND (:q IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :q, '%'))) " +
+            "AND (:catId IS NULL OR c.id = :catId)")
+    List<Material> findFiltered(@Param("locId") Long locId, @Param("q") String q, @Param("catId") Long catId);
 }

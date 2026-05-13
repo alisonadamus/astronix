@@ -24,6 +24,13 @@ public class MaterialService {
         return repository.findAll();
     }
 
+    public List<Material> search(Long locationId, String query, Long categoryId) {
+        if ((query == null || query.isEmpty()) && categoryId == null) {
+            return repository.findByLocation_Id(locationId);
+        }
+        return repository.findFiltered(locationId, query, categoryId);
+    }
+
     public Material getById(Long id) {
         return repository.findById(id).orElse(new Material());
     }

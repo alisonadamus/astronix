@@ -1,7 +1,10 @@
 package com.alisonadamus.astronix.controller;
 
+import com.alisonadamus.astronix.model.Difficulty;
 import com.alisonadamus.astronix.model.Location;
+import com.alisonadamus.astronix.model.TaskType;
 import com.alisonadamus.astronix.service.LocationService;
+import com.alisonadamus.astronix.service.MaterialCategoryService;
 import com.alisonadamus.astronix.service.MaterialService;
 import com.alisonadamus.astronix.service.TaskService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ public class LocationController {
 
     private final LocationService locationService;
     private final MaterialService materialService;
+    private final MaterialCategoryService materialCategoryService;
     private final TaskService taskService;
 
     @GetMapping
@@ -30,12 +34,28 @@ public class LocationController {
     }
 
     @GetMapping("/{id}")
-    public String showLocationDetails(@PathVariable Long id, Model model) {
+    public String showLocationDetails(
+            @PathVariable Long id,
+            @RequestParam(required = false) String materialSearch,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) TaskType taskType,
+            @RequestParam(required = false) Difficulty difficulty,
+            Model model) {
+
         Location location = locationService.getById(id);
 
         model.addAttribute("location", location);
-        model.addAttribute("materials", materialService.getByLocation(id));
-        model.addAttribute("tasks", taskService.getTasksByLocation(id));
+        model.addAttribute("materials", materialService.search(id, materialSearch, categoryId));
+        model.addAttribute("tasks", taskService.search(id, taskType, difficulty));
+
+        model.addAttribute("allCategories", materialCategoryService.getAll(null));
+        model.addAttribute("taskTypes", TaskType.values());
+        model.addAttribute("difficulties", Difficulty.values());
+
+        model.addAttribute("selectedCategoryId", categoryId);
+        model.addAttribute("selectedTaskType", taskType);
+        model.addAttribute("selectedDifficulty", difficulty);
+        model.addAttribute("materialSearch", materialSearch);
 
         return "location-details";
     }

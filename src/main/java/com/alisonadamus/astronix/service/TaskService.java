@@ -27,6 +27,13 @@ public class TaskService {
         return taskRepository.findOccupiedIndicesByLocationId(locationId);
     }
 
+    public List<Task> search(Long locationId, TaskType type, Difficulty diff) {
+        if (type == null && diff == null) {
+            return getTasksByLocation(locationId);
+        }
+        return taskRepository.findFiltered(locationId, type, diff);
+    }
+
     public Task getById(Long id) {
         return taskRepository.findById(id).orElse(new Task());
     }
