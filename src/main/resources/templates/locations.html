@@ -41,6 +41,11 @@
             <img th:src="${loc.imageUrl != null} ? ${loc.imageUrl} : '/images/default-planet.png'"
                  alt="Planet" class="planet-image">
             <span class="planet-name" th:text="${loc.name}">Назва локації</span>
+            <div style="margin-top: 8px; font-size: 0.8rem; color: #a0aec0;">
+                <span>Прогрес місії</span>
+                <span th:text="${locationProgressMap.get(loc.id)} + '%'" style="color: #4facfe; font-weight: bold;">0%</span>
+            </div>
+
         </a>
     </div>
 

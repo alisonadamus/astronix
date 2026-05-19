@@ -25,10 +25,19 @@ public class LocationController {
     private final MaterialService materialService;
     private final MaterialCategoryService materialCategoryService;
     private final TaskService taskService;
+    private final ResultService resultService;
 
     @GetMapping
-    public String showLocationsPage(@RequestParam(value = "search", required = false) String search, Model model) {
-        model.addAttribute("locations", locationService.searchLocations(search));
+    public String showLocationsPage(@RequestParam(value = "search", required = false)
+                                        String search, Model model, Principal principal) {
+
+        User user = userService.findByEmail(principal.getName());
+        List<Location> locations = locationService.searchLocations(search);
+
+        Map<Long, Integer> locationProgressMap = resultService.calculateLocationsProgress(locations, user);
+
+        model.addAttribute("locations", locations);
+        model.addAttribute("locationProgressMap", locationProgressMap);
         model.addAttribute("searchQuery", search);
         model.addAttribute("showSearch", true);
         return "locations";
