@@ -84,7 +84,13 @@
             <!-- СЕКЦІЯ ЗАВДАНЬ -->
             <div>
                 <h2 style="color: #4facfe; border-bottom: 2px solid rgba(79, 172, 254, 0.2); padding-bottom: 12px; margin-bottom: 20px;">Випробування</h2>
-
+                <div th:if="${param.locked}"
+                     style="display: flex; align-items: center; gap: 15px; background: rgba(245, 101, 101, 0.15); border: 1px solid #f56565; color: #f56565; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; font-weight: 500; animation: shake 0.4s ease-in-out;">
+                    <div>
+                        <div style="font-weight: bold; font-size: 0.95rem;">Місія заблокована!</div>
+                        <div style="font-size: 0.85rem; color: #feb2b2; margin-top: 2px;">Ви не можете перестрибнути рівень. Спершу завершіть попереднє завдання.</div>
+                    </div>
+                </div>
                 <!-- Фільтри завдань -->
                 <form th:action="@{/locations/{id}(id=${location.id})}" method="get" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
                     <select name="taskType" style="flex: 1; background: #1a202c; color: white; border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 8px;">
@@ -103,26 +109,54 @@
                 </form>
 
                 <div style="display: flex; flex-direction: column; gap: 15px;">
-                    <a th:each="t : ${tasks}" th:href="@{/tasks/{id}(id=${t.id})}"
-                       style="display: flex; align-items: center; gap: 20px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); padding: 15px 20px; border-radius: 12px; text-decoration: none; color: white;">
+                    <th:block th:each="t : ${tasks}" th:with="isLocked=${tasksLockStatus.get(t.id)}">
 
-                        <div style="background: rgba(79, 172, 254, 0.15); color: #4facfe; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid rgba(79, 172, 254, 0.3);"
-                             th:text="${t.orderIndex}">1</div>
+                        <div th:if="${isLocked}"
+                             style="display: flex; align-items: center; gap: 20px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 12px; color: #4a5568;">
 
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600;" th:text="'Місія ' + ${t.orderIndex}"></div>
-                            <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
-                                <!-- Рівень складності -->
-                                <span th:text="${t.difficulty.name}"
-                                      th:style="'font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; border: 1px solid; ' +
-                              (${t.difficulty.name() == 'EASY'} ? 'color: #48bb78; border-color: #48bb78;' :
-                               (${t.difficulty.name() == 'MEDIUM'} ? 'color: #ecc94b; border-color: #ecc94b;' : 'color: #f56565; border-color: #f56565;'))">
-                        </span>
-                                <span style="color: #718096; font-size: 0.8rem;">•</span>
-                                <span style="color: #a0aec0; font-size: 0.85rem;" th:text="${t.type.name}"></span>
+                            <div style="background: rgba(255, 255, 255, 0.02); color: #4a5568; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid rgba(255, 255, 255, 0.05);">
+                                🔒
+                            </div>
+
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: #5a6578;" th:text="'Місія ' + ${t.orderIndex} + ' (Заблоковано)'"></div>
+
+                                <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px; opacity: 0.4;">
+                                    <span th:text="${t.difficulty.name}"
+                                          style="font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; border: 1px solid #4a5568; color: #4a5568;">
+                    </span>
+                                    <span style="color: #4a5568; font-size: 0.8rem;">•</span>
+                                    <span style="color: #4a5568; font-size: 0.85rem;" th:text="${t.type.name}"></span>
+                                </div>
                             </div>
                         </div>
-                    </a>
+
+                        <a th:if="${!isLocked}" th:href="@{/tasks/{id}(id=${t.id})}"
+                           style="display: flex; align-items: center; gap: 20px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); padding: 15px 20px; border-radius: 12px; text-decoration: none; color: white; transition: all 0.2s ease;"
+                           onmouseover="this.style.background='rgba(79, 172, 254, 0.08)'; this.style.borderColor='rgba(79, 172, 254, 0.3)';"
+                           onmouseout="this.style.background='rgba(0,0,0,0.4)'; this.style.borderColor='rgba(255,255,255,0.08)';">
+
+                            <div style="background: rgba(79, 172, 254, 0.15); color: #4facfe; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid rgba(79, 172, 254, 0.3);"
+                                 th:text="${t.orderIndex}">1</div>
+
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;" th:text="'Місія ' + ${t.orderIndex}"></div>
+                                <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
+                                    <span th:text="${t.difficulty.name}"
+                                          th:style="'font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; border: 1px solid; ' +
+                          (${t.difficulty.name() == 'EASY'} ? 'color: #48bb78; border-color: #48bb78;' :
+                           (${t.difficulty.name() == 'MEDIUM'} ? 'color: #ecc94b; border-color: #ecc94b;' : 'color: #f56565; border-color: #f56565;'))">
+                    </span>
+                                    <span style="color: #718096; font-size: 0.8rem;">•</span>
+                                    <span style="color: #a0aec0; font-size: 0.85rem;" th:text="${t.type.name}"></span>
+                                </div>
+                            </div>
+
+                            <div style="color: #4facfe; font-weight: bold;">→</div>
+                        </a>
+
+                    </th:block>
+
                     <p th:if="${#lists.isEmpty(tasks)}" style="color: #718096; text-align: center;">Завдань не знайдено</p>
                 </div>
             </div>

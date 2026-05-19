@@ -37,6 +37,10 @@ public class TaskController {
         User user = userService.findByEmail(principal.getName());
         Result result = resultService.getResult(user, task).orElse(null);
 
+        if (taskService.isTaskLocked(task, user)) {
+            return "redirect:/locations/" + task.getLocation().getId() + "?locked=true";
+        }
+
         List<?> displayAnswers = task.getAnswers();
         if (task.getType() == TaskType.ORDER) {
             Collections.shuffle(displayAnswers);
@@ -66,4 +70,22 @@ public class TaskController {
         System.out.println(principal.getName());
         return ResponseEntity.ok(result);
     }
+
+/*    @GetMapping("/{id}")
+    public String showTask(@PathVariable Long id, Principal principal, Model model) {
+        Task task = taskService.getById(id);
+
+        User user = userService.findByEmail(principal.getName());
+
+        // Головна перевірка доступу
+        if (taskService.isTaskLocked(task, user)) {
+            // Перенаправляємо на сторінку локації з параметром помилки
+            return "redirect:/locations/" + task.getLocation().getId() + "?locked=true";
+        }
+
+        model.addAttribute("task", task);
+        // ... додавання інших атрибутів (результату, відповідей тощо)
+
+        return "task-execution";
+    }*/
 }

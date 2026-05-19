@@ -1,12 +1,7 @@
 package com.alisonadamus.astronix.controller;
 
-import com.alisonadamus.astronix.model.Difficulty;
-import com.alisonadamus.astronix.model.Location;
-import com.alisonadamus.astronix.model.TaskType;
-import com.alisonadamus.astronix.service.LocationService;
-import com.alisonadamus.astronix.service.MaterialCategoryService;
-import com.alisonadamus.astronix.service.MaterialService;
-import com.alisonadamus.astronix.service.TaskService;
+import com.alisonadamus.astronix.model.*;
+import com.alisonadamus.astronix.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,11 +10,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Controller
 @RequestMapping("/locations")
 @RequiredArgsConstructor
 public class LocationController {
 
+    private final UserService userService;
     private final LocationService locationService;
     private final MaterialService materialService;
     private final MaterialCategoryService materialCategoryService;
@@ -35,7 +36,7 @@ public class LocationController {
 
     @GetMapping("/{id}")
     public String showLocationDetails(
-            @PathVariable Long id,
+            @PathVariable Long id, Principal principal,
             @RequestParam(required = false) String materialSearch,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) TaskType taskType,
@@ -43,10 +44,18 @@ public class LocationController {
             Model model) {
 
         Location location = locationService.getById(id);
+        User user = userService.findByEmail(principal.getName());
+        List<Task> filteredTasks = taskService.search(id, taskType, difficulty);
+
+        Map<Long, Boolean> tasksLockStatus = new HashMap<>();
+        for (Task task : filteredTasks) {
+            tasksLockStatus.put(task.getId(), taskService.isTaskLocked(task, user));
+        }
 
         model.addAttribute("location", location);
         model.addAttribute("materials", materialService.search(id, materialSearch, categoryId));
-        model.addAttribute("tasks", taskService.search(id, taskType, difficulty));
+        model.addAttribute("tasks", filteredTasks);
+        model.addAttribute("tasksLockStatus", tasksLockStatus);
 
         model.addAttribute("allCategories", materialCategoryService.getAll(null));
         model.addAttribute("taskTypes", TaskType.values());

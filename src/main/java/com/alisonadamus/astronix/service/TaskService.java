@@ -1,6 +1,7 @@
 package com.alisonadamus.astronix.service;
 
 import com.alisonadamus.astronix.model.*;
+import com.alisonadamus.astronix.repository.ResultRepository;
 import com.alisonadamus.astronix.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -9,11 +10,13 @@ import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class TaskService {
     private final TaskRepository taskRepository;
+    private final ResultRepository resultRepository;
 
     public List<Task> getAllTasks() {
         return taskRepository.findAllByOrderByOrderIndexAsc();
@@ -36,6 +39,23 @@ public class TaskService {
 
     public Task getById(Long id) {
         return taskRepository.findById(id).orElse(new Task());
+    }
+
+    public boolean isTaskLocked(Task task, User user) {
+        Optional<Task> previousTaskOpt = taskRepository
+                .findFirstByLocationIdAndOrderIndexLessThanOrderByOrderIndexDesc(
+                        task.getLocation().getId(),
+                        task.getOrderIndex()
+                );
+
+        if (previousTaskOpt.isEmpty()) {
+            return false;
+        }
+
+        Task previousTask = previousTaskOpt.get();
+        Optional<Result> previousResult = resultRepository.findByUserAndTask(user, previousTask);
+
+        return previousResult.isEmpty() || !previousResult.get().isCompleted();
     }
 
     @Transactional

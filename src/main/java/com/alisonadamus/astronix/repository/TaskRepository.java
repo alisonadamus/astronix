@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
@@ -25,4 +26,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
             "AND (:diff IS NULL OR t.difficulty = :diff) " +
             "ORDER BY t.orderIndex ASC")
     List<Task> findFiltered(@Param("locId") Long locId, @Param("tType") TaskType tType, @Param("diff") Difficulty diff);
+
+    Optional<Task> findFirstByLocationIdAndOrderIndexLessThanOrderByOrderIndexDesc(Long locationId, Integer currentOrderIndex);
 }
